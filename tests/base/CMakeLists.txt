@@ -21,6 +21,12 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         -DYAS_SERIALIZE_BOOST_TYPES
         -DYAS_OBJECT_MAX_MEMBERS=50
     )
+    if(MINGW)
+      if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_definitions("-O1")
+      endif()
+      add_definitions("-Wa,-mbig-obj")
+    endif()
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(COMPILER_BITS 64)
