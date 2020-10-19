@@ -32,9 +32,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
       endif()
       add_definitions("-Wa,-mbig-obj")
     endif()
-
-    # Process Abseil's CMake build system
-    add_subdirectory("/usr/local/abseil-cpp" "build/abseil")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(COMPILER_BITS 64)
