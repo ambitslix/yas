@@ -33,59 +33,71 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-#ifndef __yas__detail__type_traits__has_function_serialize_hpp
-#define __yas__detail__type_traits__has_function_serialize_hpp
-
-#include <yas/detail/tools/cast.hpp>
-
-#include <type_traits>
-
-namespace yas {
-namespace detail {
-
-extern void serialize(int&);
+#ifndef __yas__tests__base__include__absl_cont_flat_hash_map_hpp
+#define __yas__tests__base__include__absl_cont_flat_hash_map_hpp
 
 /***************************************************************************/
 
-template<bool is_fundamental, bool is_enum, typename Ar, typename T>
-struct has_function_const_serialize: std::false_type {};
+template<typename archive_traits>
+bool absl_cont_flat_hash_map_test(std::ostream &log, const char *archive_type, const char *test_name) {
+	absl::flat_hash_map<int, int> imap, imap2;
+	imap.emplace(1, 2);
+	imap.emplace(1, 2);
+	imap.emplace(2, 3);
+	imap.emplace(3, 4);
 
-template<typename Ar, typename T>
-struct has_function_const_serialize<false, false, Ar, T> {
-	typedef char (&yes) [1];
-	typedef char (&no)  [2];
+	typename archive_traits::oarchive oa;
+	archive_traits::ocreate(oa, archive_type);
+	oa & YAS_OBJECT_NVP("obj", ("map", imap));
 
-	template<typename U, typename U2>
-	static yes check(decltype(serialize(*__YAS_SCAST(U*, nullptr), *__YAS_SCAST(const U2*, nullptr)))*);
+	typename archive_traits::iarchive ia;
+	archive_traits::icreate(ia, oa, archive_type);
+	ia & YAS_OBJECT_NVP("obj", ("map", imap2));
 
-	template<typename U, typename U2>
-	static no check(...);
+	if ( imap != imap2 ) {
+		YAS_TEST_REPORT(log, archive_type, test_name);
+		return false;
+	}
 
-	enum { value = sizeof(check<Ar, T>(0)) == sizeof(yes) };
-};
+	absl::flat_hash_map<int, std::string> map, map2;
+	map.emplace(1, "1");
+	map.emplace(2, "2");
+	map.emplace(3, "3");
+
+	typename archive_traits::oarchive oa2;
+	archive_traits::ocreate(oa2, archive_type);
+	oa2 & YAS_OBJECT_NVP("obj", ("map", map));
+
+	typename archive_traits::iarchive ia2;
+	archive_traits::icreate(ia2, oa2, archive_type);
+	ia2 & YAS_OBJECT_NVP("obj", ("map", map2));
+
+	if ( map != map2 ) {
+		YAS_TEST_REPORT(log, archive_type, test_name);
+		return false;
+	}
+
+	absl::flat_hash_map<std::string, int> map3, map4;
+	map3.emplace("1", 1);
+	map3.emplace("2", 2);
+	map3.emplace("3", 3);
+
+	typename archive_traits::oarchive oa3;
+	archive_traits::ocreate(oa3, archive_type);
+	oa3 & YAS_OBJECT_NVP("obj", ("map", map3));
+
+	typename archive_traits::iarchive ia3;
+	archive_traits::icreate(ia3, oa3, archive_type);
+	ia3 & YAS_OBJECT_NVP("obj", ("map", map4));
+
+	if ( map3 != map4 ) {
+		YAS_TEST_REPORT(log, archive_type, test_name);
+		return false;
+	}
+
+	return true;
+}
 
 /***************************************************************************/
 
-template<bool is_fundamental, bool is_enum, typename Ar, typename T>
-struct has_function_serialize: std::false_type {};
-
-template<typename Ar, typename T>
-struct has_function_serialize<false, false, Ar, T> {
-	typedef char (&yes) [1];
-	typedef char (&no)  [2];
-
-	template<typename U, typename U2>
-	static yes check(decltype(serialize(*__YAS_SCAST(U*, nullptr), *__YAS_SCAST(U2*, nullptr)))*);
-
-	template<typename U, typename U2>
-	static no check(...);
-
-	enum { value = sizeof(check<Ar, T>(0)) == sizeof(yes) };
-};
-
-/***************************************************************************/
-
-} // ns detail
-} // ns yas
-
-#endif // __yas__detail__type_traits__has_function_serialize_hpp
+#endif // __yas__tests__base__include__absl_cont_flat_hash_map_hpp

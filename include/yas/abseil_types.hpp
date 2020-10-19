@@ -33,59 +33,14 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-#ifndef __yas__detail__type_traits__has_function_serialize_hpp
-#define __yas__detail__type_traits__has_function_serialize_hpp
+#ifndef __yas__abseil_types_hpp
+#define __yas__abseil_types_hpp
 
-#include <yas/detail/tools/cast.hpp>
+#if defined(YAS_SERIALIZE_ABSL_TYPES)
 
-#include <type_traits>
+#include <yas/types/abseil/btree_map.hpp>
+#include <yas/types/abseil/flat_hash_map.hpp>
 
-namespace yas {
-namespace detail {
+#endif // defined(YAS_SERIALIZE_ABSL_TYPES)
 
-extern void serialize(int&);
-
-/***************************************************************************/
-
-template<bool is_fundamental, bool is_enum, typename Ar, typename T>
-struct has_function_const_serialize: std::false_type {};
-
-template<typename Ar, typename T>
-struct has_function_const_serialize<false, false, Ar, T> {
-	typedef char (&yes) [1];
-	typedef char (&no)  [2];
-
-	template<typename U, typename U2>
-	static yes check(decltype(serialize(*__YAS_SCAST(U*, nullptr), *__YAS_SCAST(const U2*, nullptr)))*);
-
-	template<typename U, typename U2>
-	static no check(...);
-
-	enum { value = sizeof(check<Ar, T>(0)) == sizeof(yes) };
-};
-
-/***************************************************************************/
-
-template<bool is_fundamental, bool is_enum, typename Ar, typename T>
-struct has_function_serialize: std::false_type {};
-
-template<typename Ar, typename T>
-struct has_function_serialize<false, false, Ar, T> {
-	typedef char (&yes) [1];
-	typedef char (&no)  [2];
-
-	template<typename U, typename U2>
-	static yes check(decltype(serialize(*__YAS_SCAST(U*, nullptr), *__YAS_SCAST(U2*, nullptr)))*);
-
-	template<typename U, typename U2>
-	static no check(...);
-
-	enum { value = sizeof(check<Ar, T>(0)) == sizeof(yes) };
-};
-
-/***************************************************************************/
-
-} // ns detail
-} // ns yas
-
-#endif // __yas__detail__type_traits__has_function_serialize_hpp
+#endif // __yas__abseil_types_hpp

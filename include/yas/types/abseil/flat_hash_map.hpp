@@ -1,4 +1,3 @@
-
 // Copyright (c) 2010-2019 niXman (i dot nixman dog gmail dot com). All
 // rights reserved.
 //
@@ -33,59 +32,41 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-#ifndef __yas__detail__type_traits__has_function_serialize_hpp
-#define __yas__detail__type_traits__has_function_serialize_hpp
+#ifndef __yas__types__abseil__absl_flat_hash_map_serializers_hpp
+#define __yas__types__abseil__absl_flat_hash_map_serializers_hpp
 
-#include <yas/detail/tools/cast.hpp>
+#include <yas/detail/type_traits/type_traits.hpp>
+#include <yas/detail/type_traits/serializer.hpp>
+#include <yas/types/concepts/keyval.hpp>
 
-#include <type_traits>
+#include <absl/container/flat_hash_map.h>
 
 namespace yas {
 namespace detail {
 
-extern void serialize(int&);
-
 /***************************************************************************/
 
-template<bool is_fundamental, bool is_enum, typename Ar, typename T>
-struct has_function_const_serialize: std::false_type {};
+template<std::size_t F, typename K, typename V>
+struct serializer<
+	type_prop::not_a_fundamental,
+	ser_case::use_internal_serializer,
+	F,
+	absl::flat_hash_map<K, V>
+> {
+	template<typename Archive>
+	static Archive& save(Archive &ar, const absl::flat_hash_map<K, V> &map) {
+        return concepts::keyval::save<F>(ar, map);
+	}
 
-template<typename Ar, typename T>
-struct has_function_const_serialize<false, false, Ar, T> {
-	typedef char (&yes) [1];
-	typedef char (&no)  [2];
-
-	template<typename U, typename U2>
-	static yes check(decltype(serialize(*__YAS_SCAST(U*, nullptr), *__YAS_SCAST(const U2*, nullptr)))*);
-
-	template<typename U, typename U2>
-	static no check(...);
-
-	enum { value = sizeof(check<Ar, T>(0)) == sizeof(yes) };
+	template<typename Archive>
+	static Archive& load(Archive &ar, absl::flat_hash_map<K, V> &map) {
+        return concepts::keyval::load<F>(ar, map);
+	}
 };
 
 /***************************************************************************/
 
-template<bool is_fundamental, bool is_enum, typename Ar, typename T>
-struct has_function_serialize: std::false_type {};
+} // namespace detail
+} // namespace yas
 
-template<typename Ar, typename T>
-struct has_function_serialize<false, false, Ar, T> {
-	typedef char (&yes) [1];
-	typedef char (&no)  [2];
-
-	template<typename U, typename U2>
-	static yes check(decltype(serialize(*__YAS_SCAST(U*, nullptr), *__YAS_SCAST(U2*, nullptr)))*);
-
-	template<typename U, typename U2>
-	static no check(...);
-
-	enum { value = sizeof(check<Ar, T>(0)) == sizeof(yes) };
-};
-
-/***************************************************************************/
-
-} // ns detail
-} // ns yas
-
-#endif // __yas__detail__type_traits__has_function_serialize_hpp
+#endif // __yas__types__abseil__absl_flat_hash_map_serializers_hpp

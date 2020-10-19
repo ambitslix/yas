@@ -11,14 +11,19 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         -DBOOST_ERROR_CODE_HEADER_ONLY
         -DBOOST_CHRONO_HEADER_ONLY
         -DYAS_SERIALIZE_BOOST_TYPES
+        -DYAS_SERIALIZE_ABSL_TYPES
         -DYAS_OBJECT_MAX_MEMBERS=50
     )
+
+    # Process Abseil's CMake build system
+    add_subdirectory("/usr/local/abseil-cpp" "build/abseil")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
     add_definitions(
         -DBOOST_ERROR_CODE_HEADER_ONLY
         -DBOOST_CHRONO_HEADER_ONLY
         -DYAS_SERIALIZE_BOOST_TYPES
+        -DYAS_SERIALIZE_ABSL_TYPES
         -DYAS_OBJECT_MAX_MEMBERS=50
     )
     if(MINGW)
@@ -27,6 +32,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
       endif()
       add_definitions("-Wa,-mbig-obj")
     endif()
+
+    # Process Abseil's CMake build system
+    add_subdirectory("/usr/local/abseil-cpp" "build/abseil")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(COMPILER_BITS 64)
@@ -35,6 +43,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     endif()
 
     message("TOOLSET=" ${MSVC_TOOLSET_VERSION})
+
+    # Process Abseil's CMake build system
+    add_subdirectory("C:/abseil-cpp" "build/abseil")
 
     include_directories("C:/local/boost_1_66_0")
     link_directories("C:/local/boost_1_66_0/lib${COMPILER_BITS}-msvc-14.1")
@@ -51,6 +62,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         -DBOOST_ERROR_CODE_HEADER_ONLY
         -DBOOST_CHRONO_HEADER_ONLY
         -DYAS_SERIALIZE_BOOST_TYPES
+        -DYAS_SERIALIZE_ABSL_TYPES
         -DYAS_OBJECT_MAX_MEMBERS=50
         -D_CRT_SECURE_NO_WARNINGS
     )
@@ -127,7 +139,13 @@ set(SOURCE_FILES
     include/version.hpp
     include/wstring.hpp
     include/yas_object.hpp
+    include/absl_cont_btree_map.hpp
+    include/absl_cont_flat_hash_map.hpp
     main.cpp
 )
 
 add_executable(yas-base-test ${SOURCE_FILES})
+target_link_libraries(yas-base-test 
+    absl::btree
+    absl::flat_hash_map
+)
