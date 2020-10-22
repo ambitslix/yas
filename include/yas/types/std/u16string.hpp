@@ -1,3 +1,4 @@
+
 // Copyright (c) 2010-2019 niXman (i dot nixman dog gmail dot com). All
 // rights reserved.
 //
@@ -32,36 +33,41 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-#ifndef __yas__types__abseil__absl_btree_map_serializers_hpp
-#define __yas__types__abseil__absl_btree_map_serializers_hpp
 
-#if defined(YAS_SERIALIZE_ABSL_TYPES)
+#ifndef __yas__types__std__std_u16string_serializers_hpp
+#define __yas__types__std__std_u16string_serializers_hpp
+
+#include <yas/detail/tools/utf8conv.hpp>
+
 #include <yas/detail/type_traits/type_traits.hpp>
 #include <yas/detail/type_traits/serializer.hpp>
-#include <yas/types/concepts/keyval.hpp>
-
-#include <absl/container/btree_map.h>
 
 namespace yas {
 namespace detail {
 
 /***************************************************************************/
 
-template<std::size_t F, typename K, typename V>
+template<std::size_t F>
 struct serializer<
 	type_prop::not_a_fundamental,
 	ser_case::use_internal_serializer,
 	F,
-	absl::btree_map<K, V>
+	std::u16string
 > {
 	template<typename Archive>
-	static Archive& save(Archive &ar, const absl::btree_map<K, V> &map) {
-        return concepts::keyval::save<F>(ar, map);
+	static Archive& save(Archive& ar, const std::u16string& u16string) {
+		std::string dst;
+		detail::TypeConverter<std::string, std::u16string>::Convert(dst, u16string);
+		ar & dst;
+		return ar;
 	}
 
 	template<typename Archive>
-	static Archive& load(Archive &ar, absl::btree_map<K, V> &map) {
-        return concepts::keyval::load<F>(ar, map);
+	static Archive& load(Archive& ar, std::u16string& u16string) {
+		std::string string;
+		ar & string;
+		detail::TypeConverter<std::u16string, std::string>::Convert(u16string, string);
+		return ar;
 	}
 };
 
@@ -70,6 +76,4 @@ struct serializer<
 } // namespace detail
 } // namespace yas
 
-#endif // defined(YAS_SERIALIZE_ABSL_TYPES)
-
-#endif // __yas__types__abseil__absl_btree_map_serializers_hpp
+#endif // __yas__types__std__std_u16string_serializers_hpp

@@ -45,6 +45,7 @@
 #include <yas/types/std/complex.hpp>
 #include <yas/types/std/string.hpp>
 #include <yas/types/std/string_view.hpp>
+#include <yas/types/std/u16string.hpp>
 #include <yas/types/std/wstring.hpp>
 #include <yas/types/std/vector.hpp>
 #include <yas/types/std/list.hpp>

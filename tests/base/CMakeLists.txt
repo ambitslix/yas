@@ -5,25 +5,33 @@ set (CMAKE_CXX_STANDARD 11)
 
 add_definitions(-UNDEBUG)
 
+if (YAS_SERIALIZE_ABSL_TYPES)
+    message("Abseil support is enabled")
+else()
+    message("Abseil support is disabled")
+endif()
+
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
     add_definitions(
         -DBOOST_ERROR_CODE_HEADER_ONLY
         -DBOOST_CHRONO_HEADER_ONLY
         -DYAS_SERIALIZE_BOOST_TYPES
-        -DYAS_SERIALIZE_ABSL_TYPES
         -DYAS_OBJECT_MAX_MEMBERS=50
     )
 
-    # Process Abseil's CMake build system
-    add_subdirectory("/usr/local/abseil-cpp" "build/abseil")
+    if (YAS_SERIALIZE_ABSL_TYPES)
+        add_definitions(-DYAS_SERIALIZE_ABSL_TYPES)
+
+        # Process Abseil's CMake build system
+        add_subdirectory("/usr/local/abseil-cpp" "build/abseil")
+    endif()
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
     add_definitions(
         -DBOOST_ERROR_CODE_HEADER_ONLY
         -DBOOST_CHRONO_HEADER_ONLY
         -DYAS_SERIALIZE_BOOST_TYPES
-        -DYAS_SERIALIZE_ABSL_TYPES
         -DYAS_OBJECT_MAX_MEMBERS=50
     )
     if(MINGW)
@@ -31,6 +39,12 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         add_definitions("-O1")
       endif()
       add_definitions("-Wa,-mbig-obj")
+
+    if (YAS_SERIALIZE_ABSL_TYPES)
+        add_definitions(-DYAS_SERIALIZE_ABSL_TYPES)
+        
+        # Process Abseil's CMake build system
+        add_subdirectory("/usr/local/abseil-cpp" "build/abseil")
     endif()
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -40,9 +54,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     endif()
 
     message("TOOLSET=" ${MSVC_TOOLSET_VERSION})
-
-    # Process Abseil's CMake build system
-    add_subdirectory("C:/abseil-cpp" "build/abseil")
 
     include_directories("C:/local/boost_1_66_0")
     link_directories("C:/local/boost_1_66_0/lib${COMPILER_BITS}-msvc-14.1")
@@ -59,10 +70,16 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         -DBOOST_ERROR_CODE_HEADER_ONLY
         -DBOOST_CHRONO_HEADER_ONLY
         -DYAS_SERIALIZE_BOOST_TYPES
-        -DYAS_SERIALIZE_ABSL_TYPES
         -DYAS_OBJECT_MAX_MEMBERS=50
         -D_CRT_SECURE_NO_WARNINGS
     )
+
+    if (YAS_SERIALIZE_ABSL_TYPES)
+        add_subdirectory("C:/abseil-cpp" "build/abseil")
+    
+        # Process Abseil's CMake build system
+        add_definitions(-DYAS_SERIALIZE_ABSL_TYPES)
+    endif()
 endif()
 
 include_directories(
@@ -127,6 +144,7 @@ set(SOURCE_FILES
     include/string.hpp
     include/string_view.hpp
     include/tuple.hpp
+    include/u16string.hpp
     include/unordered_map.hpp
     include/unordered_multimap.hpp
     include/unordered_multiset.hpp
@@ -142,7 +160,10 @@ set(SOURCE_FILES
 )
 
 add_executable(yas-base-test ${SOURCE_FILES})
-target_link_libraries(yas-base-test 
-    absl::btree
-    absl::flat_hash_map
-)
+
+if (YAS_SERIALIZE_ABSL_TYPES)
+    target_link_libraries(yas-base-test 
+        absl::btree
+        absl::flat_hash_map
+    )
+endif()
